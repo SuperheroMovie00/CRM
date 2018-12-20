@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ysd.dao.PermissionMapper">
+
+	<!-- 查询所有的权限的操作名例如:UnLockUser -->
+	<select id="queryAll" resultType="java.lang.String">
+		SELECT permissionValue FROM
+		permission
+	</select>
+
+	<!-- 批量插入权限信息(使用foreach循环) -->
+	<insert id="batchInsert" parameterType="list">
+		INSERT INTO
+		permission(permissionId,permissionValue,permissionModule,permissionName)
+		VALUES
+		<foreach collection="list" item="permission" separator=",">
+			(#{permission.permissionId},#{permission.permissionValue},#{permission.permissionModule},#{permission.permissionName})
+		</foreach>
+	</insert>
+
+
+	<!-- 查询角色所没有的权限信息 -->
+	<select id="queryNode" resultMap="permissionNodeMap">
+		SELECT * from permission where
+		permissionId not in (SELECT permissionId from
+		rolepermission where
+		roleId=#{roleId})
+	</select>
+
+	<!-- 查询角色所拥有的权限信息 -->
+	<select id="queryNotNode" resultMap="permissionNodeMap">
+		SELECT * from permission
+		where permissionId in (SELECT permissionId from
+		rolepermission where
+		roleId=#{roleId})
+	</select>
+
+
+	<!-- 将权限映射为node类从而将权限输出成为一棵树 -->
+	<resultMap type="node" id="permissionNodeMap">
+		<result property="text" column="permissionModule" />
+		<collection property="children" ofType="node">
+			<id property="id" column="permissionId" />
+			<result property="text" column="permissionName" />
+		</collection>
+	</resultMap>
+
+	<!-- 将权限映射为node类从而将权限输出成为一棵树 -->
+	<resultMap type="nodeER" id="permissionNodeMapER">
+		<result property="text" column="permissionModule" />
+		<collection property="children" ofType="nodeER">
+			<id property="id" column="permissionId" />
+			<result property="permissionid" column="permissionId" />
+			<result property="text" column="permissionName" />
+			<result property="context" column="permissionValue" />
+		</collection>
+	</resultMap>
+
+
+
+
+	<!-- 给角色添加权限在角色权限表中(使用foreach循环) -->
+	<insert id="rolesetpermission" parameterType="list">
+		insert into rolepermission(rolePermissionId,roleId,permissionId)
+		VALUES
+		<foreach collection="list" item="item" separator=",">
+			(#{item.rolePermissionId},#{item.roleId},#{item.permissionId})
+		</foreach>
+	</insert>
+
+
+	<!-- 删除角色的权限(和模块一样循环删除操作,而不是循环删除语句) -->
+	<delete id="deleterolepermission">
+		delete from rolepermission where roleId=#{roleId} and
+		permissionId=#{permissionId}
+	</delete>
+
+
+	<!-- 根据角色的名字查询所拥有的权限 -->
+	<select id="selectallpermission" parameterType="java.lang.String"
+		resultMap="permissionNodeMapER">
+		SELECT *from permission
+		<where>
+			<if test="roleName!=null and roleName!=''">
+				permissionId in(SELECT permissionId from rolepermission
+				where
+				roleId in (SELECT
+				Id from roles where Name=#{roleName}))
+			</if>
+		</where>
+	</select>
+
+	<!-- 根据权限的名字查询权限 -->
+	<select id="selectpermissionfromname" parameterType="java.lang.String"
+		resultMap="permissionNodeMapER">
+		select *from permission
+		<where>
+			<if test="name!=null and name!=''">
+				permissionName like "%"#{name}"%"
+			</if>
+		</where>
+	</select>
+
+	<!-- 根据用户的名字查询所拥有的权限集合 -->
+	<select id="selectpermissionfromuser" resultType="String">
+		SELECT
+		permissionValue from permission where permissionId in(SELECT
+		permissionId from rolepermission where roleId in(SELECT roleid FROM
+		userroles where Userid =(SELECT Id from users where LoginName=#{username})))
+	</select>
+	
+	
+	<select id="select" resultType="java.lang.String" parameterType="java.lang.String">
+	SELECT permissionId  from permission
+		where permissionId in (SELECT permissionId from
+		rolepermission where
+		roleId=#{roleId})
+	</select>
+	
+	<select id="selecter" resultMap="permissionNodeMapER">
+	select *from permission
+	</select>
+	
+	
+	<delete id="deletepermission" parameterType="java.lang.String">
+	delete from rolepermission where roleId=#{rid}
+	</delete>
+
+
+</mapper>

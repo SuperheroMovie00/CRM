@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.ysd.dao.AskersMapper">
+
+<!-- 查询所有的咨询师 -->
+<select id="selectaskers" resultType="askers">
+select *from askers ORDER BY Weight desc
+</select>
+
+<!-- 修改一个咨询师的信息(权重值,备注) -->
+<update id="updateaskers">
+update  askers set Weight=#{weight},BakContent=#{bakContent} where AskerName=#{name} 
+</update>
+
+<!-- 查询已签到的咨询师集合 -->
+<select id="selectaskersfromqiandao" resultType="userChecks">
+select *from userchecks where  CheckState ='已签到' and  date(CheckInTime) = curdate() and userName like "%"'咨询师'"%" order by CheckInTime desc
+</select>
+
+<!-- 签到当前签到的咨询师 -->
+<update id="qiandaozixunshi">
+UPDATE askers set checkstate='已签到',CheckInTime=NOW() where askerId=#{id}
+</update>
+
+<!-- 查询咨询师(权重排序,添加学生否,签到时间当天,已签到,取第一个) -->
+<select id="zidongfenpeizixunshi" resultType="askers">
+SELECT * from askers where CheckState='已签到' and ChangeState='否' and date(CheckInTime) = curdate() ORDER BY Weight DESC LIMIT 1
+</select>
+
+<!-- 查询咨询师(权重排序,添加学生否,签到时间当天,已签到,取第一个) -->
+<select id="zidongfenpeizixunshi2" resultType="askers">
+SELECT * from askers where CheckState='已签到' and date(CheckInTime) = curdate()
+</select>
+
+
+
+<!-- 添加一个学生之后将添加学生状态改为是 -->
+<update id="updatestate">
+UPDATE askers SET ChangeState='是' where AskerId=#{askId}
+</update>
+
+
+<!-- 如果所有的咨询师状态都是是则全部改成否 -->
+<update id="updatestatefou">
+UPDATE askers set ChangeState='否'
+</update>
+
+<!-- 插入一条咨询师信息(添加用户的角色为咨询师的时候,在咨询师表中插入一条信息,用户已经签到过了) -->
+<insert id="insertasker">
+insert into askers(AskerId,AskerName,CheckState,CheckInTime,RoleName) values(#{id},#{askname},'已签到',now(),'咨询师')
+</insert>
+
+<!-- 给用户设置一个角色为咨询师用户没有签到的状态 -->
+<insert id="insertaskerer">
+insert into askers(AskerId,AskerName,RoleName) values(#{id},#{askname},'咨询师')
+</insert>
+
+<!-- 取消用户的咨询师的角色(同时删除咨询师表中的此条信息) -->
+<delete id="deleteasker">
+delete from askers where AskerId=#{id}
+</delete>
+
+
+
+</mapper>

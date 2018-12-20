@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.ysd.dao.NetfollowsMapper">
+
+
+	<select id="selectnetfollows" resultType="netfollows">
+		select
+		a.Id,a.StudentId,a.StudentName,a.FollowTime,a.NextFollowTime,a.Content,b.LoginName,a.followType,a.CreateTime,a.FollowState
+		from netfollows a LEFT JOIN users b on a.UserId=b.Id
+		<where>
+			<if test="userName!=null and userName!=''">
+				a.StudentName like "%"#{userName}"%"
+			</if>
+			<if test="LoginName!=null and LoginName!=''">
+				b.LoginName like "%"#{LoginName}"%"
+			</if>
+			<if test="beginCreateTime!=null and beginCreateTime!=''">
+				a.FollowTime &gt;=#{beginCreateTime}
+			</if>
+			<if test="endCreateTime!=null and endCreateTime!=''">
+				a.FollowTime &lt;=#{endCreateTime}
+			</if>
+			<if test="huistate!=null and huistate!=''">
+				a.FollowState =#{huistate}
+			</if>
+			<if test="huitype!=null and huitype!=''">
+				a.followType=#{huitype}
+			</if>
+		</where>
+	</select>
+
+
+	<!-- 新增一个跟踪 -->
+	<insert id="insertnetfollows" parameterType="netfollowQuery">
+		insert into
+		netfollows(StudentId,StudentName,FollowTime,NextFollowTime,Content,UserId,FollowType,CreateTime,FollowState)
+		values(#{Studentid},#{Studentname},#{FollowTime},#{NextFollowTime},#{Content},#{Userid},#{FollowType},now(),#{FollowState})
+	</insert>
+
+
+	<!-- 查询学生的跟踪信息 -->
+	<select id="selectgenzongfromname" resultType="netfollows">
+		SELECT *from netfollows where StudentName=#{name} and StudentId=#{id}
+	</select>
+
+
+</mapper>

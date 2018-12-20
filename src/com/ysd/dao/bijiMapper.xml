@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.ysd.dao.bijiMapper">
+
+<!-- 根据用户的id查询云笔记 -->
+<select id="selectallbiji" resultType="biji">
+select * from biji where UserId=#{uid}
+</select>
+
+<!-- 新增一条云笔记 -->
+<insert id="insertbiji">
+insert into biji(bid,UserId,context,createtime) values(#{bid},#{id},#{context},now())
+</insert>
+
+<!-- 修改一条云笔记 -->
+<update id="updatebiji" >
+update biji set context=#{context} where bId=#{bid}
+</update>
+
+<!-- 删除一条云笔记 -->
+<delete id="deletebiji">
+delete from biji where bId=#{bid}
+</delete>
+
+
+</mapper>

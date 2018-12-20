@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.ysd.dao.DynamicmessagesMapper">
+
+<!--添加一个动态 -->
+<insert id="insertdongtai">
+insert into dynamicmessages(StudentId,StudentName,MessageContent,IsOpen,CreateTime)  VALUES (#{id},#{name},#{context},'是',now())
+</insert>
+
+<!-- 查询所有的动态信息(所有的动态信息) -->
+<select id="selectDynamicmessages" resultType="dynamicmessages">
+SELECT  *  from dynamicmessages where  StudentId in(SELECT id from students where AskerId=#{id}) order by CreateTime desc
+</select>
+
+<!-- 查询所有的动态信息(只查询未查看过的) -->
+<select id="selectDynamicmessageslimit" resultType="dynamicmessages">
+SELECT  *  from dynamicmessages where  StudentId in(SELECT id from students where AskerId=#{id}) and isOpen='是'  order by CreateTime desc limit 1  
+</select>
+
+<!-- 查询动态信息(未打开的) -->
+<update id="state">
+update dynamicmessages set isOpen='否' where Id=#{id}
+</update>
+
+
+
+</mapper>
+

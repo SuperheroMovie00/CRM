@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.ysd.dao.RolesMapper">
+
+
+	<!-- 根据用户的名字查询角色的集合 -->
+	<select id="selectuserroles" resultType="roles" statementType="CALLABLE">
+		CALL user_role_proc(#{LoginName,jdbcType=VARCHAR})
+	</select>
+
+
+	<!-- 查询所有的角色信息 -->
+	<select id="selectallroles" resultType="roles">
+		SELECT *from roles
+		<where>
+			<if test="rolename!=null and rolename!=''">
+				Name like "%"#{rolename}"%"
+			</if>
+		</where>
+		limit #{offset},#{rows}
+	</select>
+
+
+
+	<!-- 插入一个角色信息 (参数:角色) -->
+	<insert id="insertrole" parameterType="roles">
+		insert into roles(Id,Name)
+		VALUES(#{Id},#{Name})
+	</insert>
+
+	<!-- 查询所有角色的总条数 -->
+	<select id="countrole" resultType="Integer">
+		select count(*) from roles
+	</select>
+
+	<!-- 删除一个角色的信息根据角色的id -->
+	<delete id="deleterole">
+		DELETE from roles where Id=#{uid}
+	</delete>
+
+	<!-- 修改角色的信息 -->
+	<update id="updaterole">
+		update roles
+		<set>
+			<if test="Name!=null||Name!=''">
+				Name=#{Name}
+			</if>
+		</set>
+		where Id=#{Id}
+	</update>
+
+	<!-- 查询用户拥有的角色信息 -->
+	<select id="selectrolefromuid" resultType="roles">
+		SELECt *from roles
+		where Id in (select RoleId from userroles where
+		UserId=#{UserId})
+	</select>
+
+
+	<!-- 查询用户没有的角色信息 -->
+	<select id="selectNotrolefromuid" resultType="roles">
+		SELECt *from roles
+		where Id not in (select RoleId from userroles where
+		UserId=#{UserId})
+	</select>
+
+	<!-- 给用户添加一个角色信息(在用户角色表中) -->
+	<insert id="AddUserToRole">
+		insert into userroles (Id,UserId,RoleId)
+		values(#{Id},#{UserId},#{roleId})
+	</insert>
+
+	<!-- 删除用户的一个角色信息(在用户角色表中) -->
+	<delete id="RemoveUserFromRole">
+		DELETE from userroles where UserId=#{UserId} and
+		RoleId=#{roleId}
+	</delete>
+
+	<!-- 查询所有的角色 -->
+	<select id="selectrolesall" resultType="roles">
+		select *from roles
+	</select>
+
+	<!-- 角色模板下载 -->
+	<select id="rolemoban" resultType="rolemoban">
+		select *from roles limit 1
+	</select>
+	
+	<insert id="insertrolemoban" parameterType="rolemoban">
+	insert into roles(Id,Name) value(#{Id},#{Name})
+	</insert>
+	
+	<select id="selectrolefromname" resultType="roles">
+	select *from roles where Name=#{rolename}
+	</select>	
+
+
+
+
+
+</mapper>

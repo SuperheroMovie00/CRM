@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.ysd.dao.UserCheckMapper">
+
+
+	<!-- 查询员工签到表中的所有数据 (模糊条件查询) -->
+	<select id="selectalluserCheck" resultType="userChecks"
+		parameterType="userCheckQuery">
+		SELECT SQL_CALC_FOUND_ROWS*from userchecks
+		<where>
+
+			<if test="userName!=null and userName!=''">
+				UserName like "%"#{userName}"%"
+			</if>
+
+			<if test="beginCreateTime!=null and beginCreateTime!=''">
+				and CheckInTime &gt;=#{beginCreateTime}
+			</if>
+			<if test="endCreateTime!=null and endCreateTime!=''">
+				and CheckInTime &lt;=#{endCreateTime}
+			</if>
+			<if test="order!=null and order !=''">
+				 CheckState=#{order}
+			</if>
+		</where>
+		limit #{offset},#{rows}
+	</select>
+
+
+	<!-- 员工签到 -->
+	<update id="qiandao">
+		update userchecks set CheckInTime=now(), CheckState='已签到' where UserName=#{username}
+	</update>
+	
+	<insert id="qiandaoqian"> 
+	insert into userchecks(UserId,UserName,CheckInTime,CheckState,IsCancel,CheckOutTime)
+	values(#{id},#{username},now(),'已签到','否',null)
+	</insert>
+
+	<!-- 员工签退 -->
+	<update id="qiantui">
+		update userchecks set CheckOutTime=now(), CheckState='已签退' where UserName=#{username}
+	</update>
+	
+	<!-- 员工签退 -->
+	<update id="qiantuiqian">
+		update userchecks set CheckOutTime=now(), CheckState='已签退' where date(CheckInTime) = curdate() and UserName=#{username}
+	</update>
+
+	<select id="usercheckcount" resultType="Integer">
+		select count(*) from userchecks
+	</select>
+	
+	
+	<select id="selectstate" resultType="userChecks" parameterType="java.lang.String">
+	select * from userchecks where date(CheckInTime) = curdate() and UserName=#{LoginName}
+	</select>
+	
+	
+
+
+
+
+
+
+
+
+</mapper>

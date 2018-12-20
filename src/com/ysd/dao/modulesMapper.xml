@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.ysd.dao.ModulesMapper">
+
+	<!-- 根据角色名称查询其拥有的模块 -->
+
+	<select id="selectmodulesfromname" resultType="modules"
+		statementType="CALLABLE">
+		CALL role_module_proc(#{roleName,jdbcType=VARCHAR})
+	</select>
+
+	<!-- 查询所有的模块(因为其后的模块树的映射 问题所以要加上Parent=0,即为父亲id为0) -->
+	<select id="selectallmodule" resultMap="moduleTreeMap">
+		select * from modules
+		WHERE ParentId = 0 ORDER BY Weight desc
+	</select>
+
+	<!-- 根据角色id查询角色所没有的模块信息 -->
+	<select id="GetModulesByRoleId" resultMap="moduleTreeMap">
+		SELECT * from modules
+		where Id not in
+		(SELECT ModuleId from rolemodules where
+		RoleId=#{roleId})
+		and ParentId = 0 ORDER BY Weight desc
+	</select>
+
+	<!-- 根据角色的id查询角色所拥有的模块信息 -->
+	<select id="GetNotModulesByRoleId" resultMap="moduleTreeMap">
+		SELECT * from
+		modules where Id in
+		(SELECT ModuleId from rolemodules where
+		RoleId=#{roleId})
+		and ParentId = 0 ORDER BY Weight desc
+	</select>
+
+	<!-- 批量插入到模块角色给关系表中数据使用mybatis中的foreach循环操作 -->
+	<insert id="SetSysRights" parameterType="list">
+		insert into rolemodules values
+		<foreach collection="module" item="modules" separator=",">
+			(#{modules.Id},#{modules.RoleId},#{modules.ModuleId})
+		</foreach>
+	</insert>
+
+
+	<!-- 这里是批量删除角色所拥有的模块在模块角色关系表中, 这部操作循环是在实现类中循环删除操作, 而不是在mabatis中循环的 -->
+	<delete id="Deletemodule">
+		delete from rolemodules where RoleId=#{RoleId} and
+		ModuleId=#{ModuleId}
+	</delete>
+
+
+
+	<!-- 这里是模块树的映射 -->
+	<resultMap id="moduleTreeMap" type="modulesTree">
+		<id property="id" column="Id"></id>
+		<result property="name" column="Name"></result>
+		<result property="parentId" column="ParentId"></result>
+		<result property="path" column="Path"></result>
+		<result property="ops" column="Ops"></result>
+		<result property="int0" column="Int0"></result>
+		<result property="icon_class" column="icon_class"></result>
+
+		<!-- 这里是映射中的关键位置(显示子节点的信息) -->
+		<collection property="children" ofType="modulesTree"
+			column="id" select="getChildren">
+		</collection>
+	</resultMap>
+
+
+	<!-- 这是上面的映射中的附属查询,即为子节点的查询 -->
+	<select id="getChildren" resultMap="moduleTreeMap">
+		select * from modules where
+		ParentId=#{id} ORDER BY Weight desc
+	</select>
+
+	<!-- 删除模块根据模块的id -->
+	<delete id="DeleteModule">
+		delete from modules where Id=#{mid}
+	</delete>
+
+	<!-- 修改一个模块信息(参数:模块) -->
+	<update id="UpdateModule" parameterType="modules">
+		update modules
+		<set>
+			<if test="Name!=null||Name!=''">
+				Name=#{Name},
+			</if>
+			<if test="Path!=null||Path!=''">
+				Path=#{Path},
+			</if>
+			<if test="Weight!=null||Weight!=''">
+				Weight=#{Weight}
+			</if>
+		</set>
+		where Id=#{Id}
+	</update>
+
+
+	<!-- 添加一个模块信息 (参数:模块) -->
+	<insert id="CreateModule" parameterType="modules">
+		insert into
+		modules(Name,ParentId,Path,Weight)
+		VALUES(#{Name},#{ParentId},#{Path},#{Weight})
+	</insert>
+
+
+	<!-- 根据角色的名字查询模块集合 -->
+	<select id="selectmodulefromrolename" resultMap="moduleTreeMap"
+		parameterType="java.lang.String">
+		select *from modules
+		<where>
+			<if test="1==1">
+				and ParentId = 0
+			</if>
+			<if test="roleName!=null and roleName!=''">
+				and Id in(SELECT ModuleId from rolemodules
+				where RoleId
+				in(SELECT Id from
+				roles where Name=#{roleName}))
+			</if>
+		</where>
+	</select>
+
+
+	<!-- 根据模块的名字查询模块 -->
+	<select id="selectmodulefromname" resultMap="moduleTreeMap"
+		parameterType="java.lang.String">
+		select *from modules
+		<where>
+			<if test="1==1">
+				and ParentId = 0
+			</if>
+			<if test="Name!=null and Name!=''">
+				and Name=#{Name}
+			</if>
+		</where>
+		ORDER BY Weight desc
+	</select>
+
+
+
+	<!-- 根据角色的id查询它所拥有模块 -->
+	<select id="selectmodule" resultType="Integer">
+		select ModuleId from rolemodules where RoleId=#{roleId}
+	</select>
+
+	<!-- 查询根据父亲parentid父节点 -->
+	<select id="selectmoduleList" resultType="modules">
+		select *from modules where ParentId=#{pId}
+	</select>
+
+
+	<!-- 根据角色的id删除所拥有的模块 -->
+	<delete id="deletemodule">
+		delete from rolemodules where RoleId=#{roleId}
+	</delete>
+	
+    <!-- 插入一条模块信息-->
+	<insert id="insertmodule">
+		insert into rolemodules values(#{Id},#{roleId},#{ModuleId})
+	</insert>
+
+    <!-- 根据父节点id查询模块 -->
+	<select id="selectparentmodule" resultType="modules">
+		select *from modules where ParentId=#{pId}
+	</select>
+
+
+
+</mapper>
+
+
+
+

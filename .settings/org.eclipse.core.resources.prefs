@@ -1,0 +1,15 @@
+eclipse.preferences.version=1
+encoding//src/com/ysd/controller/ExcelController.java=UTF-8
+encoding//src/com/ysd/dao/PermissionMapper.java=UTF-8
+encoding//src/com/ysd/entity/Node.java=UTF-8
+encoding//src/com/ysd/entity/QueryBase.java=UTF-8
+encoding//src/com/ysd/entity/SysPermission.java=UTF-8
+encoding//src/com/ysd/entity/SysPermissionQuery.java=UTF-8
+encoding//src/com/ysd/entity/SysRole.java=UTF-8
+encoding//src/com/ysd/entity/SysUser.java=UTF-8
+encoding//src/com/ysd/entity/SysUtils.java=UTF-8
+encoding//src/com/ysd/interceptor=UTF-8
+encoding//src/com/ysd/service/PermissionService.java=UTF-8
+encoding//src/com/ysd/util/ExportExcel.java=UTF-8
+encoding//src/com/ysd/util/PoiHandler.java=UTF-8
+encoding//src/com/ysd/util/PoiUtils.java=UTF-8

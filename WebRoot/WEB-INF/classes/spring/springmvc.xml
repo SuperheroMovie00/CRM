@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop" 
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+        http://www.springframework.org/schema/mvc 
+        http://www.springframework.org/schema/mvc/spring-mvc-4.2.xsd 
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop-4.2.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx.xsd">
+        
+    <!-- 一个配置节解决映射器和适配器的配置注解配置 --> 
+    <mvc:annotation-driven>
+    <mvc:message-converters>
+    	<bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+				<property name="supportedMediaTypes">
+					<list>
+					<value>text/html;charset=UTF-8</value>
+					<value>text/plain;charset=UTF-8</value>
+					<value>application/json;charset=UTF-8</value>
+					</list>
+				</property>
+			</bean>
+  </mvc:message-converters>
+  </mvc:annotation-driven>
+  
+  
+  <mvc:interceptors>
+		<!-- 符合 SpringMVC url-pattern 的所有请求  权限管理身份识别拦截器-->
+		 <!-- <bean class="com.ysd.interceptor.LoginInterceptor" ></bean> -->
+		 <!-- 符合 SpringMVC url-pattern 的所有请求   允许跨域访问拦截器-->
+		 <bean class="com.ysd.interceptor.EmptyLoginInterceptor" ></bean>
+		<!-- 自定义 url-pattern 的所有请求-->
+		<!--<mvc:interceptor>
+			<mvc:mapping path="/app/*.html*" />
+			<bean class="com.ysd.interceptor.LoginInterceptor" />
+		</mvc:interceptor>-->
+	</mvc:interceptors>
+  
+  
+	<!--配置拦截器-->
+	<!-- <mvc:interceptors>
+	  <mvc:interceptor>
+	    <mvc:mapping path="/*/*.html" />
+	    <mvc:mapping path="/*/*.do" />
+	    <mvc:exclude-mapping path="/home/login.html" />
+	    <mvc:exclude-mapping path="/home/logout.html" />
+	   <bean class="com.nids.web.ActionInterceptor" />
+	 </mvc:interceptor>
+	</mvc:interceptors> -->
+
+	
+
+	
+<!-- SpringMVC框架支持的文件上传 -->
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">  
+        <property name="defaultEncoding" value="utf-8"></property>   
+        <property name="maxUploadSize" value="10485760000"></property>  
+        <property name="maxInMemorySize" value="40960"></property>
+   </bean>  
+   
+   
+
+    <!-- 扫描所有的Controller -->
+    <context:component-scan base-package="com.ysd.controller"/>
+    
+     <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/jsp/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+    <!-- 静态资源解析，包括js,css,img... -->
+    <mvc:resources location="/js/" mapping="/js/**"></mvc:resources>
+    <mvc:resources location="/img/" mapping="/img/**"></mvc:resources>
+</beans>

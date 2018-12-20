@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.ysd.dao.UserMapper">
+
+	<!-- 根据用户的名字查询用户的信息(用于登陆操作) -->
+	<select id="selectuserbypass" resultType="user">
+		SELECT *FROM users
+		WHERE LoginName=#{LoginName}
+	</select>
+
+	<!-- 插入一条用户的信息 -->
+	<insert id="insertuser" parameterType="user">
+		insert into
+		users(Id,LoginName,Password,IsLockout,ProtectEMail,protectMTel)
+		values
+		(#{Id},#{LoginName},#{Password},'否',#{ProtectEMail},#{protectMTel})
+	</insert>
+
+	<!-- 删除一条用户的信息(根据用户的id) -->
+	<delete id="deleteuser">
+		DELETE FROM users WHERE Id=#{uid}
+	</delete>
+
+	<!-- 查询用户信息的总条数 -->
+	<select id="countuser" resultType="Integer">
+		select count(*) from users
+	</select>
+
+	<!-- 查询全部的用户信息(模糊条件查询) -->
+	<select id="selectuser" resultType="user" parameterType="usersQuery">
+		SELECT SQL_CALC_FOUND_ROWS* FROM users
+		<where>
+			<if test="userName!=null and userName !=''">
+				loginName like "%"#{userName}"%"
+			</if>
+			<if test="isLockout!=null and isLockout !=''">
+				and IsLockout=#{isLockout}
+			</if>
+			<if test="beginCreateTime!=null and beginCreateTime!=''">
+				and createTime &gt;=#{beginCreateTime}
+			</if>
+			<if test="endCreateTime!=null and endCreateTime!=''">
+				and createTime &lt;=#{endCreateTime}
+			</if>
+			<if test="protectEMail!=null and protectEMail!=''">
+				and protectEMail like "%"#{protectEMail}"%"
+			</if>
+			<if test="protectMTel!=null and protectMTel!=''">
+				and protectMTel like "%"#{protectMTel}"%"
+			</if>
+		</where>
+		<if test="order!=null and order!=''">
+			order by ${order} desc
+		</if>
+		limit #{offset},#{rows}
+	</select>
+
+
+	<!-- 修改一个用户的信息 -->
+	<update id="updateuser">
+		update users
+		<set>
+			<if test="ProtectEMail!=null||ProtectEMail!=''">
+				ProtectEMail=#{ProtectEMail},
+			</if>
+			<if test="protectMTel!=null||protectMTel!=''">
+				protectMTel=#{protectMTel},
+			</if>
+		</set>
+		where LoginName=#{LoginName}
+	</update>
+
+	<!-- 锁定一个用户信息 -->
+	<update id="LockUser">
+		UPDATE users set IsLockout='是' where
+		LoginName=#{LoginName}
+	</update>
+
+	<!-- 解锁一个用户 -->
+	<update id="UnLockUser">
+		UPDATE users set IsLockout='否' where
+		LoginName=#{LoginName}
+	</update>
+
+	<!-- 重置用户的密码 -->
+	<update id="ResetPassword">
+		UPDATE users set `Password`=#{Password} where
+		LoginName =#{LoginName}
+	</update>
+
+	<!-- 修改一个用户的密码 -->
+	<update id="updatepassword">
+		update users set Password=#{password} where Id=#{Id}
+	</update>
+
+	<!-- 查询用户的密码 (用户修改密码的操作) -->
+	<select id="selectuserforId" resultType="java.lang.String">
+		select Password from
+		users where Id=#{Id}
+	</select>
+	<!-- 密码错误加一 -->
+	<update id="psdpassword">
+		UPDATE users set PsdWrongTime=PsdWrongTime+1 where
+		LoginName=#{LoginName}
+	</update>
+
+	<!-- 查询密码错误的次数 -->
+	<select id="numpassword" resultType="Integer">
+		SELECT PsdWrongTime from
+		users where LoginName=#{LoginName}
+	</select>
+
+	<!-- 清除密码错误次数 -->
+	<update id="deletepwdnum">
+		UPDATE users set PsdWrongTime=0 where
+		LoginName=#{LoginName}
+	</update>
+
+
+	<!-- 查询所有的用户 -->
+	<select id="selectuserall" resultType="user">
+		select *from users
+	</select>
+
+
+	<!-- 查询所有的用户(失效) -->
+	<select id="selectuserer" resultType="user">
+		select *from users where Id
+		in(${id})
+	</select>
+
+
+	<!-- 用户的模板下载 -->
+	<select id="usermoban" resultType="usermoban">
+		select *from users limit 1
+	</select>
+
+	<!-- 模板导入添加 -->
+	<insert id="insertusermoban" parameterType="usermoban">
+		insert into
+		users(Id,LoginName,Password,IsLockout,ProtectEMail,protectMTel,CreateTime)
+		values(#{Id},#{LoginName},#{Password},'否',#{ProtectEMail},#{protectMTel},now())
+	</insert>
+
+	<!--查询所有的用户 -->
+	<select id="selectalluser" resultType="user">
+	select  *from users
+ 	</select>
+
+
+
+</mapper>
